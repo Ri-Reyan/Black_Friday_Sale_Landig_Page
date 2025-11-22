@@ -36,7 +36,7 @@ const BlackFriday = () => {
   }, []);
 
   return (
-    <section className="bg-zinc-800 flex-grow h-full w-full text-white md:h-screen lg:h-full ">
+    <section className="bg-gradient-to-b from-zinc-900 to-zinc-800 flex-grow h-screen w-full text-white md:h-screen lg:h-full ">
       <div className="font-normal tracking-widest flex justify-center relative top-4 text-3xl">
         <h1>
           SOMETHING BIG IS <br />
@@ -47,24 +47,32 @@ const BlackFriday = () => {
       <div className="flex flex-col space-y-10 items-center mt-10 overflow-auto">
         <div className="flex gap-32">
           <div>
-            <span className="font-bold text-7xl">{timeLeft.days}</span>
+            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
+              {timeLeft.days}
+            </span>
             <h3 className="text-center">days</h3>
           </div>
 
           <div>
-            <span className="font-bold text-7xl">{timeLeft.hours}</span>
+            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
+              {timeLeft.hours}
+            </span>
             <h3 className="text-center text-lg">hours</h3>
           </div>
         </div>
 
         <div className="flex gap-32">
           <div>
-            <span className="font-bold text-7xl">{timeLeft.minutes}</span>
+            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
+              {timeLeft.minutes}
+            </span>
             <h3 className="text-center text-lg">minutes</h3>
           </div>
 
           <div>
-            <span className="font-bold text-7xl">{timeLeft.seconds}</span>
+            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
+              {timeLeft.seconds}
+            </span>
             <h3 className="text-center text-lg">seconds</h3>
           </div>
         </div>
@@ -80,12 +88,12 @@ const BlackFriday = () => {
           onSubmit={(e) => {
             e.preventDefault();
             setEmail("");
-            setSuccess(!success);
+            setSuccess(true);
           }}
           className="flex flex-col space-y-4 place-items-center mt-10"
         >
           <input
-            className="h-[60px] w-[60%] rounded-md px-4 text-lg text-gray-600 focus:outline-none"
+            className="h-[60px] w-[60%] rounded-md px-4 text-lg text-gray-700 bg-white focus:ring-4 focus:ring-yellow-300 outline-none"
             type="email"
             name="email"
             value={email}
@@ -98,7 +106,7 @@ const BlackFriday = () => {
             <h4 className="text-green-500 text-lg font-medium">Successfull</h4>
           )}
 
-          <button className="h-[60px] w-[60%] rounded-md px-4 text-xl font-semibold text-black bg-yellow-400 focus:outline-none">
+          <button className="h-[60px] w-[60%] rounded-md px-4 text-xl font-semibold text-black bg-yellow-400 focus:outline-none hover:scale-110">
             NOTIFY ME
           </button>
         </form>
