@@ -1,125 +1,153 @@
 import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+
+const getEndTime = () => {
+  const saved = localStorage.getItem("bf_timer_v1");
+  if (saved) return Number(saved);
+
+  const time = Date.now() + FIVE_DAYS;
+  localStorage.setItem("bf_timer_v1", time);
+  return time;
+};
+
+const calcTimeLeft = (end) => {
+  const diff = Math.max(0, end - Date.now());
+  return {
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff / 3600000) % 24),
+    minutes: Math.floor((diff / 60000) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+    done: diff <= 0,
+  };
+};
+
+const Box = ({ label, value }) => (
+  <div className="flex flex-col items-center">
+    <motion.span
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 18 }}
+      className="font-extrabold text-5xl md:text-6xl lg:text-7xl"
+    >
+      {String(value).padStart(2, "0")}
+    </motion.span>
+    <p className="uppercase text-xs md:text-sm tracking-wider mt-2 text-gray-300">
+      {label}
+    </p>
+  </div>
+);
 
 const BlackFriday = () => {
+  const endRef = useRef(getEndTime());
+  const [t, setT] = useState(calcTimeLeft(endRef.current));
+
   const [email, setEmail] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({});
-  const endTimeRef = useRef(null); // Initialize empty
+  const [msg, setMsg] = useState({ type: "", text: "" });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Set the end time after the component mounts
-    endTimeRef.current = Date.now() + 432000000; // 5 days in ms
-
-    const calculateTime = () => {
-      const now = Date.now();
-      const diff = endTimeRef.current - now;
-
-      if (diff <= 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-      } else {
-        return {
-          days: Math.floor(diff / (24 * 60 * 60 * 1000)),
-          hours: Math.floor((diff / (60 * 60 * 1000)) % 24),
-          minutes: Math.floor((diff / (60 * 1000)) % 60),
-          seconds: Math.floor((diff / 1000) % 60),
-        };
-      }
-    };
-
-    setTimeLeft(calculateTime()); // initialize state
-
     const timer = setInterval(() => {
-      setTimeLeft(calculateTime());
+      setT(calcTimeLeft(endRef.current));
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
+  const submit = (e) => {
+    e.preventDefault();
+    setMsg({ type: "", text: "" });
+
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!valid) {
+      setMsg({ type: "error", text: "Enter a valid email." });
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setMsg({ type: "success", text: "Saved! UI-only demo." });
+      setEmail("");
+      setTimeout(() => setMsg({ type: "", text: "" }), 3000);
+    }, 800);
+  };
+
   return (
-    <section className="bg-gradient-to-b from-zinc-900 to-zinc-800 flex-grow h-screen w-full text-white md:h-screen lg:h-full ">
-      <div className="font-normal tracking-widest flex justify-center relative top-4 text-3xl">
-        <h1>
-          SOMETHING BIG IS <br />
-          <span className="mx-16">COMING</span>
-        </h1>
+    <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-zinc-800 text-white px-6 py-12 flex flex-col items-center">
+      <motion.h1
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-3xl md:text-5xl font-semibold text-center tracking-wide"
+      >
+        SOMETHING BIG IS
+        <span className="block md:inline ml-2">COMING</span>
+      </motion.h1>
+
+      {/* Countdown */}
+      <div className="mt-10 w-full max-w-4xl bg-white/5 backdrop-blur-sm rounded-xl p-6 flex flex-col items-center">
+        <div className="flex gap-6 flex-wrap justify-center">
+          <Box label="days" value={t.days} />
+          <Box label="hours" value={t.hours} />
+          <Box label="minutes" value={t.minutes} />
+          <Box label="seconds" value={t.seconds} />
+        </div>
+
+        <p className="text-sm text-gray-400 mt-4">
+          {t.done ? "Sale is live!" : "Countdown to our biggest sale ever"}
+        </p>
       </div>
 
-      <div className="flex flex-col space-y-10 items-center mt-10 overflow-auto">
-        <div className="flex gap-32">
-          <div>
-            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
-              {timeLeft.days}
-            </span>
-            <h3 className="text-center">days</h3>
-          </div>
+      {/* Sub text */}
+      <p className="text-center text-gray-300 mt-8 max-w-xl">
+        Be the first to know. Drop your email — we’ll ping you when we launch.
+      </p>
 
-          <div>
-            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
-              {timeLeft.hours}
-            </span>
-            <h3 className="text-center text-lg">hours</h3>
-          </div>
-        </div>
-
-        <div className="flex gap-32">
-          <div>
-            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
-              {timeLeft.minutes}
-            </span>
-            <h3 className="text-center text-lg">minutes</h3>
-          </div>
-
-          <div>
-            <span className="font-bold text-7xl transition-all duration-300 hover:scale-110">
-              {timeLeft.seconds}
-            </span>
-            <h3 className="text-center text-lg">seconds</h3>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div className="mt-10 text-center text-xl font-normal">
-          <h1>Our biggest sale ever will</h1>
-          <h1>change the way you live.</h1>
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setEmail("");
-            setSuccess(true);
-          }}
-          className="flex flex-col space-y-4 place-items-center mt-10"
-        >
+      {/* Form */}
+      <form
+        onSubmit={submit}
+        className="mt-6 w-full max-w-xl flex flex-col gap-3"
+      >
+        <div className="flex gap-3">
           <input
-            className="h-[60px] w-[60%] rounded-md px-4 text-lg text-gray-700 bg-white focus:ring-4 focus:ring-yellow-300 outline-none"
             type="email"
-            name="email"
+            placeholder="Enter your email"
+            className="flex-1 px-4 h-14 rounded-md text-black focus:ring-2 focus:ring-yellow-300 outline-none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
+            required
           />
-          {success === false ? (
-            <></>
-          ) : (
-            <h4 className="text-green-500 text-lg font-medium">Successfull</h4>
-          )}
 
-          <button className="h-[60px] w-[60%] rounded-md px-4 text-xl font-semibold text-black bg-yellow-400 focus:outline-none hover:scale-110">
-            NOTIFY ME
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 h-14 rounded-md bg-yellow-400 text-black font-semibold hover:scale-105 transition disabled:opacity-50"
+          >
+            {loading ? "Loading..." : "Notify"}
           </button>
-        </form>
-
-        <div className="mt-10 text-center text-lg font-normal">
-          <h1 className="whitespace-nowrap tracking-tighter">
-            Provide your email address to get notified when
-          </h1>
-          <h1> the sale starts.</h1>
         </div>
-      </div>
-      <br />
-      <br />
+
+        <AnimatePresence>
+          {msg.text && (
+            <motion.p
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className={`text-sm ${
+                msg.type === "error" ? "text-red-400" : "text-green-400"
+              }`}
+            >
+              {msg.text}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </form>
+
+      <p className="text-xs text-gray-400 mt-4">
+        This is a UI-only demo. Backend integration available on request.
+      </p>
     </section>
   );
 };

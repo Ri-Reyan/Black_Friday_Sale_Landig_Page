@@ -3,7 +3,7 @@ import BlackFriday from "./components/BlackFriday";
 
 const App = () => {
   return (
-    <div className="min-h-full">
+    <div className="min-h-screen">
       <BlackFriday />
     </div>
   );
